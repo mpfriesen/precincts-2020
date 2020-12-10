@@ -18,7 +18,7 @@ function clearInfo() {
 
     var precinctData = {};
     var precids = {};
-
+    var marker;
     //pull in geojson  and loop through it to make some arrays for later use
     $.ajax({
         type: 'GET',
@@ -79,7 +79,7 @@ function clearInfo() {
         });
 
 
-        //add different map layers
+        //add different map layers and use expressions to determine polygon color from data
 
         map.addLayer({
             'id': 'precincts_20',
@@ -478,12 +478,26 @@ function clearInfo() {
     	    lng = result[0].lng;
     	    countynum = countyids[countyname];
     	    pid = countynum+precnum;
-    	    
-    	    //use precinct id to generate map click and add marker to map
+    	    precQuery(pid);
+    	    //use precinct id to query data, generate map click and zoom/add marker to map
     	    mapClick(precdata.features[precids[pid]].properties);
-    	    var marker = new mapboxgl.Marker()
+    	    marker = new mapboxgl.Marker()
                 .setLngLat([lng, lat])
                 .addTo(map);
     	}, 'voterPrecinct,county,lat,lng');
     }
 
+
+    function precQuery(id) {
+        $.ajax({
+            url: 'HttpServlet',
+            type: 'POST',
+            data: id,
+            success: function(data){
+                console.log(data);
+            },
+            error: function(xhr, status, error) {
+                alert("An AJAX error occured: " + status + "\nError: " + error);
+            }
+        });
+    }

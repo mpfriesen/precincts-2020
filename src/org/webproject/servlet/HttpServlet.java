@@ -23,7 +23,7 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @see javax.servlet.http.HttpServlet#javax.servlet.http.HttpServlet()
+     * @see javax.servlet.http.HttpServlet
      */
     public HttpServlet() {
         super();
@@ -35,44 +35,29 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     }
 
+
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse
             response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        JSONObject data = new JSONObject();
-        try {
-            java.util.Date d = new java.util.Date();
-            data.put("Time request received:",d.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        response.getWriter().write(data.toString());
-    }
-
-    /**
-     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-     */
-    protected void doPost2(HttpServletRequest request, HttpServletResponse
-            response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String tab_id = request.getParameter("tab_id");
+//        String tab_id = request.getParameter("tab_id");
 
         // create a report
-        if (tab_id.equals("0")) {
-            System.out.println("A report is submitted!");
-            try {
-                createReport(request, response);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // query reports
-        else if (tab_id.equals("1")) {
+//        if (tab_id.equals("0")) {
+//            System.out.println("A report is submitted!");
+//            try {
+//                createReport(request, response);
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        // query reports
+//        else if (tab_id.equals("1")) {
             try {
                 queryReport(request, response);
             } catch (JSONException e) {
@@ -82,7 +67,7 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
+//        }
     }
 
     private void createReport(HttpServletRequest request, HttpServletResponse
@@ -225,12 +210,51 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
                 "  LEFT JOIN results ON results.p_id = metro_precincts.p_id " +
                 "  LEFT JOIN demo ON demo.p_id = metro_precincts.p_id " +
                 "  WHERE metro_precincts.p_id=" + pid + ") inputs) features";
+        System.out.println(sql);
         ResultSet res = dbutil.queryDB(sql);
         while (res.next()) {
-            System.out.println(res.getString(1));
+            String json = res.getString(1);
+            response.getWriter().write(json);
         }
     }
 
+
+    private void queryReportHelper(String sql, JSONArray list, String report_type,
+                                   String disaster_type, String resource_or_damage) throws SQLException {
+        DBUtility dbutil = new DBUtility();
+        if (disaster_type != null) {
+            sql += " and disaster_type = '" + disaster_type + "'";
+        }
+        if (resource_or_damage != null) {
+            if (report_type.equalsIgnoreCase("damage")) {
+                sql += " and damage_type = '" + resource_or_damage + "'";
+            } else {
+                sql += " and resource_type = '" + resource_or_damage + "'";
+            }
+        }
+        ResultSet res = dbutil.queryDB(sql);
+        while (res.next()) {
+            // add to response
+            HashMap<String, String> m = new HashMap<String,String>();
+            m.put("report_id", res.getString("id"));
+            m.put("report_type", res.getString("report_type"));
+            if (report_type.equalsIgnoreCase("donation") ||
+                    report_type.equalsIgnoreCase("request")) {
+                m.put("resource_type", res.getString("resource_type"));
+            }
+            else if (report_type.equalsIgnoreCase("damage")) {
+                m.put("damage_type", res.getString("damage_type"));
+            }
+            m.put("disaster", res.getString("disaster_type"));
+            m.put("first_name", res.getString("first_name"));
+            m.put("last_name", res.getString("last_name"));
+            m.put("time_stamp", res.getString("time_stamp"));
+            m.put("longitude", res.getString("longitude"));
+            m.put("latitude", res.getString("latitude"));
+            m.put("message", res.getString("message"));
+            list.put(m);
+        }
+    }
 
     public void main() throws JSONException {
     }
