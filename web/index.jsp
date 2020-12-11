@@ -68,41 +68,7 @@
 </div>
 <div class="left-panels left-bottom" id="legend"></div>
 
-<!-- Modal -->
-<%--<div class="modal fade" id="AboutModal" tabindex="-1" role="dialog" aria-labelledby="AboutRedlining" aria-hidden="true">--%>
-<%--  <div class="modal-dialog" role="document">--%>
-<%--    <div class="modal-content">--%>
-<%--      <div class="modal-header">--%>
-<%--        <h5 class="modal-title" id="AboutRedlining">About Redlining</h5>--%>
-<%--        <button type="button" class="close" data-dismiss="modal" aria-label="Close">--%>
-<%--          <span aria-hidden="true">&times;</span>--%>
-<%--        </button>--%>
-<%--      </div>--%>
-<%--      <div class="modal-body">--%>
-<%--        <p>Redlining refers to the discriminatory act of refusing to lend money, extend credit to borrowers, or show real estate in certain areas of a town. The term was dubbed from the idea that mortgage lenders would draw ?red lines? around--%>
-<%--          neighborhoods which they did not want to make loans. </p>--%>
 
-<%--        <p>Faced with a housing shortage in the 1930?s, the federal government established the Federal Housing Administration (FHA), which established practices that allowed further racial segregation and discrimination against minorities by--%>
-<%--          refusing to insure loans to neighborhoods deemed less desirable.--%>
-<%--        </p>--%>
-<%--        <p>In 1935, the Home Owners Loan Corporation (HOLC) created ?residential security maps? for 239 cities, which graded neighborhoods based on loan desirability. Type ?A? neighborhoods were colored green and were reserved for affluent--%>
-<%--          suburbs on the outskirts of towns. Type ?B?, or blue neighborhoods were considered desirable. However, type ?C?, or yellow neighborhoods, and type ?D?, or red neighborhoods were listed as declining. Typically the neighborhoods--%>
-<%--          listed as declining contained older housing stock near the center of town, and frequently these areas contained minorities, immigrants, or were primarily African American.--%>
-<%--        </p>--%>
-<%--        <p>While the practice of redlining occurred prior to the establishment of the FHA, the HOLC maps further exacerbated racial segregation and urban decay by publishing these maps for use by lenders. For decades, the FHA used the HOLC--%>
-<%--          maps in their appraisal manuals which instructed banks to steer clear of areas with certain racial groups. Withholding mortgages in these areas made it much harder for neighborhoods to attract families to purchase homes.--%>
-<%--        </p>--%>
-<%--        <p>The Fair Housing Act was passed in 1968 to combat the practice of redlining, making it unlawful for lenders to discriminate based on race or national origin. The Community Reinvestment Act passed in 1977 further reduced--%>
-<%--          discriminatory practices by requiring banks to apply the same lending criteria in all communities.--%>
-<%--        </p>--%>
-<%--      </div>--%>
-<%--      <div class="modal-footer">--%>
-<%--        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--%>
-<%--      </div>--%>
-<%--    </div>--%>
-<%--  </div>--%>
-<%--</div>--%>
-<!--scripts-->
 <script>
   var x= new RLIS.Autosuggest("q", {"mode":'query','entries':7} ,function (result, error){
     if (error) {
