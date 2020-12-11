@@ -26,7 +26,7 @@ h1 { font-family: "Playfair Display",serif; }
 h1, h2, h3, h4, h5 {
   font-weight: bold;
 }
-
+h2 { margin: 0 0 10px; padding: 0; }
 h6 {
   padding: 10px 0 0;
 }
@@ -96,7 +96,7 @@ div.mapboxgl-control-container > div.mapboxgl-ctrl-top-left > div.mapboxgl-ctrl.
 .info .pcounty { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #900; }
 .info .elex { margin: 10px 0 10px; }
 .info table { width: 100%; font-size: 12px; margin-top: 15px; }
-.info table td { border-top: px solid #ccc; padding: 3px 0;}
+.info table td { border-top: 1px solid #ccc; padding: 3px 0;}
 .info table.margins td { border: none; padding: 0; }
 .info table.margins th { width: 50%; padding-bottom: 6px; }
 .info table.demo td { border-top: 1px solid #ccc; padding: 1px 0; font-size: 90%; }
@@ -104,6 +104,22 @@ div.mapboxgl-control-container > div.mapboxgl-ctrl-top-left > div.mapboxgl-ctrl.
 .info table.demo .num { font-weight: bold; }
 .info .shiftblock,.info .marginblock { background-color: #2166ac; color: #fff; font-weight: bold; padding: 3px 5px; }
 .info .marginblock.shift_R,.info .shiftblock.shift_R { background-color: #b2182b; }
+.clacknote { font-size: 10px; margin-top: 5px; font-style: italic; display: none; }
+#update .container { margin-top: 100px; }
+
+form { margin-top: 20px; font-size: 90%; }
+
+.reset_map {
+  background-color: #900;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 3px;
+  margin-left: 10px;
+}
+
+.reset_map:hover { cursor: pointer; background-color: #300; }
 
 .left-panels, .right-panels {
   width: 180px;

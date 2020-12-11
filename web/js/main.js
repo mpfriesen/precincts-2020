@@ -18,7 +18,7 @@ function clearInfo() {
 
     var precinctData = {};
     var precids = {};
-    var marker;
+    var marker = null;
     //pull in geojson  and loop through it to make some arrays for later use
     $.ajax({
         type: 'GET',
@@ -42,7 +42,7 @@ function clearInfo() {
     });
 
     var countyids = { "Multnomah": 410510000, "Clackamas": 410050000, "Washington": 410670000 };
-    var layers = ['precincts_16','precincts_20','shift_20'];
+    var layers = ['precincts_16','precincts_20','shift_20','nonwhite','prec_single'];
 
     mapbox_path = "mapbox://mfriesenwisc.";
 
@@ -69,8 +69,26 @@ function clearInfo() {
 
         resetSwitcher("precincts_20");
         $('.info').hide();
-        
-        
+
+        function resetMap() {
+            resetSwitcher("precincts_20");
+            $('.info').hide();
+            clearMarkers();
+            resetLayers();
+            map.fitBounds([[-123,45.2],[-122,45.7]], {padding: {top: 150, bottom: 0, left: 250, right: 5} });
+        }
+
+        function resetLayers() {
+            $.each(layers,function(k,layername) {
+                map.setLayoutProperty(layername, 'visibility', 'none');
+            })
+            map.setLayoutProperty('precincts_20', 'visibility', 'visible');
+        }
+
+        $(".reset_map").on("click",function() {
+            resetMap();
+        });
+
         //add geojson data as source for map layers
         map.addSource('precincts', {
             'type': 'geojson',
@@ -140,7 +158,7 @@ function clearInfo() {
             'paint': {
                 'fill-opacity': [
                     'case',
-                    ['==', ['get','T_16'], null], 0,
+                    ['==', ['get','county'], "Clackamas"], 0,
                     ['boolean', ['feature-state', 'hover'], false],
                     1,
                     0.8
@@ -148,8 +166,7 @@ function clearInfo() {
                 'fill-color': [
                     "case", // Begin case expression
                     ['==', ['get','T_16'], 0], '#ddd',
-                    ['==', ['get','T_16'], null], '#fff',
-                    
+
                     ['>',['get','D_16'],['get','R_16']],
                     ['interpolate',
                     ['linear'],
@@ -225,8 +242,39 @@ function clearInfo() {
                 ]
             }
         })
-         
-         
+
+        map.addLayer({
+            'id': 'nonwhite',
+            'type': 'fill',
+            'source': 'precincts',
+            'layout': { 'visibility': 'none' },
+            'paint': {
+                'fill-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1,
+                    0.8
+                ],
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['/',['-',['get','pop'],['get','white']],['get','pop']],
+                    .1,
+                    '#fcc5c0',
+                    .2,
+                    '#fa9fb5',
+                    .3,
+                    '#f768a1',
+                    .4,
+                    '#dd3497',
+                    .5,
+                    '#ae017e',
+                    .6,
+                    '#7a0177'
+                ]
+            }
+        })
+
          
         // loop through layers to add listeners to each
         $.each(layers,function(k,layer) {
@@ -328,19 +376,26 @@ function clearInfo() {
 
         //Remove any markers on search box focus
         $("input#q").focus(function() {
-            marker.remove()
+            clearMarkers();
         });
-        
+
+        function clearMarkers() {
+            if (marker!=null) {
+                marker.remove()
+            }
+        }
 
         //Code for layer toggle
         $(".precinct-layers").show();
         $(".btn").on("click",function() {
             var thisLayer = $(this).data("layer");
             resetSwitcher(thisLayer);
+
             $.each(layers,function(k,layername) {
                map.setLayoutProperty(layername, 'visibility', 'none'); 
             })
             map.setLayoutProperty(thisLayer, 'visibility', 'visible');
+            map.setLayoutProperty('prec_single', 'visibility', 'none');
             
 /*
             
@@ -373,6 +428,7 @@ function clearInfo() {
             
         })
     })
+
 
 
 
@@ -435,6 +491,8 @@ function clearInfo() {
                 +   "<tr><td>Clinton</td><td class='num'>"+addCommas(d_16)+"</td><td class='num'>"+(d_16_pct*100).toFixed(1)+"%</td></tr>"
                 +   "<tr><td>Trump</td><td class='num'>"+addCommas(r_16)+"</td><td class='num'>"+(r_16_pct*100).toFixed(1)+"%</td></tr>"
                 +   "</table>";
+        } else {
+            $(".clacknote").show();
         }
         //builds tables for election results and precinct demographics
         var margintable = "<table class='margins'>"
@@ -460,6 +518,8 @@ function clearInfo() {
         $(".elex").html(margintable+elexrez);
         $(".val").html("<table class='demo'>"+demo+"</table>");
         $(".info").show();
+
+
     }
     
     
@@ -478,10 +538,9 @@ function clearInfo() {
     	    lng = result[0].lng;
     	    countynum = countyids[countyname];
     	    pid = countynum+precnum;
-    	    console.log("pid",pid);
     	    precQuery(pid);
     	    //use precinct id to query data, generate map click and zoom/add marker to map
-    	    mapClick(precdata.features[precids[pid]].properties);
+    	    // mapClick(precdata.features[precids[pid]].properties);
     	    marker = new mapboxgl.Marker()
                 .setLngLat([lng, lat])
                 .addTo(map);
@@ -490,16 +549,84 @@ function clearInfo() {
 
 
     function precQuery(id) {
-        console.log(id);
+
         $.ajax({
             url: 'HttpServlet',
             type: 'POST',
-            data: id,
+            data: {"tab_id": "1", "p_id": id},
             success: function(data){
                 console.log(data);
+                precLayer(data);
             },
             error: function(xhr, status, error) {
-                alert("An AJAX error occured: " + status + "\nError: " + error);
+                alert("An AJAX error occurred: " + status + "\nError: " + error);
             }
         });
     }
+
+    function precLayer(data) {
+        var precinct = data.features[0].properties;
+        // enumerate ids of the layers
+        var toggleableLayerIds = ['precincts_20', 'precincts_16', 'shift_20','nonwhite'];
+
+        // set up the corresponding toggle button for each layer
+        for (var i = 0; i < toggleableLayerIds.length; i++) {
+                var thislayer = toggleableLayerIds[i];
+                map.setLayoutProperty(thislayer, 'visibility', 'none');
+        }
+        mapClick(precinct);
+        map.addSource('prec', {
+            type: 'geojson',
+            data: data
+        })
+        map.addLayer({
+            'id': 'prec_single',
+            'type': 'fill',
+            'source': 'prec',
+            'layout': { 'visibility': 'visible' },
+            'paint': {
+                'fill-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1,
+                    0.8
+                ],
+                'fill-color': [
+                    "case", // Begin case expression
+                    ['==', ['get','T_20'], 0], '#ddd',
+
+                    ['>',['get','D_20'],['get','R_20']],
+                    ['interpolate',
+                        ['linear'],
+                        ['/',['get','D_20'],['get','T_20']],
+                        .40,
+                        '#d1e5f0',
+                        .60,
+                        '#92c5de',
+                        .70,
+                        '#4393c3',
+                        .80,
+                        '#2166ac',
+                        .90,
+                        '#053061'
+                    ],
+                    ['interpolate',
+                        ['linear'],
+                        ['/',['get','R_20'],['get','T_20']],
+                        .40,
+                        '#fddbc7',
+                        .60,
+                        '#f4a582',
+                        .70,
+                        '#d6604d',
+                        .80,
+                        '#b2182b',
+                        .90,
+                        '#67001f'
+                    ]
+                ]
+            }
+        })
+
+    }
+

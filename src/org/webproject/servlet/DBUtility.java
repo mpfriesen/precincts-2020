@@ -61,23 +61,4 @@ public class DBUtility {
         }
     }
 
-    /**
-     * @param args
-     * @throws SQLException
-     */
-    public static void main(String[] args) throws SQLException {
-        // You can test the methods you created here
-        DBUtility util = new DBUtility();
-
-        // 1. create a user
-        util.modifyDB("insert into person (first_name, last_name) values ('test_user_1_fN', 'test_user_1_lN')");
-
-        // 2. query the database
-        ResultSet res = util.queryDB("select * from metro_precincts where precinct = 'OR_MULTNOMAH_2701'");
-        while (res.next()) {
-            System.out.println(res.getString(1));
-        }
-
-    }
-
 }
